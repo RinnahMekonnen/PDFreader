@@ -34,7 +34,7 @@ for i in range(number_of_pages):
     #print(page_content)
     
 
-#Stemming or Lemmatization NEEDS TO BE DONE
+#Stemming or Lemmatization NEEDS TO BE DONE (we need to remove numbers)
 
 
 
@@ -43,9 +43,9 @@ count_vectorizer = CountVectorizer()  # This counts the # of words
 train_tc = count_vectorizer.fit_transform(all_words)  # generates word counts for the words in your docs
 #print(train_tc)
 
-#create dataframe
-bow_matrix=pd.DataFrame(train_tc.toarray(),columns=count_vectorizer.get_feature_names_out())
-print(bow_matrix)
+#create dataframe which gives us words
+word_matrix=pd.DataFrame(train_tc.toarray(),columns=count_vectorizer.get_feature_names_out())
+print(word_matrix)
 
 # Create the tf-idf transformer
 tfidf = TfidfTransformer()
