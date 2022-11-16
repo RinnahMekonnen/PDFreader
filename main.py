@@ -5,14 +5,27 @@
 import PyPDF2
 import pandas as pd
 from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+import nltk
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 
-#Training data X=abstract Y=Topics
-#train_dataset.csv
-
 all_words = []
 all_sentences =[]
+no_stopwords = []
+v_output = []
+lemmatized = []
+stemmed = []
+
+# Pre-process training data 
+training_data = pd.read_csv("train_dataset.csv")
+training_data.pop('id')
+print(training_data)
+
+print(training_data.iloc[:,0])
+
   
 # creating a pdf file object
 file = open('report.pdf', 'rb') #rb = open in binary format for reading
@@ -35,26 +48,55 @@ for i in range(number_of_pages):
     #print(type(page_content))
     #print('page ' + str(i))
     #print(page_content)
-    
 
-#Stemming or Lemmatization NEEDS TO BE DONE (we need to remove numbers)
+# remove hyphen from words spanning 2 lines (this doesn't work yet)
+# hyphenated = re.findall(r'\w+(?:-\w+)+',all_words)
 
+# remove numbers and symbols
+no_symbols = [x for x in all_words if (x.isalnum())]
+no_integers = [x for x in no_symbols if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
 
+# remove stop words
+nltk.download('stopwords')
+stop_words = stopwords.words("english")
+no_stopwords = [w for w in no_integers if w not in stop_words]
+#print(no_stopwords)
+
+# Stemming
+# ps = PorterStemmer()
+# for w in no_stopwords:
+#     output = ps.stem(w)
+#     stemmed.append(output)
+#     print(w, " : ", ps.stem(w))
+
+# Lemmatization
+nltk.download('wordnet')
+lemmatizer = WordNetLemmatizer()
+
+# run through verb lemmatizer
+for word in no_stopwords:
+    output = lemmatizer.lemmatize(word, pos='v')
+    v_output.append(output)
+    # print(word, output_v)
+
+# after verb lemmatizer, run through again with noun lemmatizer
+for word in v_output:
+    output_n = lemmatizer.lemmatize(word, pos='n')
+    lemmatized.append(output_n)
+    #print(word, output_n)
 
 # Build a count vectorizer and extract term counts
 count_vectorizer = CountVectorizer()  # This counts the # of words
-train_tc = count_vectorizer.fit_transform(all_words)  # generates word counts for the words in your docs
+train_tc = count_vectorizer.fit_transform(lemmatized)  # generates word counts for the words in your docs
 #print(train_tc)
 
 #create dataframe which gives us words
 word_matrix=pd.DataFrame(train_tc.toarray(),columns=count_vectorizer.get_feature_names_out())
-print(word_matrix)
+#print(word_matrix)
 
 # Create the tf-idf transformer
 tfidf = TfidfTransformer()
 train_tfidf = tfidf.fit_transform(train_tc)
-
-
 
   
 # printing number of pages in
