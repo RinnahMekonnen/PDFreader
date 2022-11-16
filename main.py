@@ -13,12 +13,17 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 
 all_words = []
-all_sentences =[]
+all_sentences = []
 no_stopwords = []
 v_output = []
 lemmatized = []
 stemmed = []
-  
+
+#remove & order id's in train_dataset.csv
+data = pd.read_csv('train_dataset.csv')
+data.pop('id')
+print(data)
+
 # creating a pdf file object
 file = open('report.pdf', 'rb') #rb = open in binary format for reading
   
