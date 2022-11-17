@@ -1,5 +1,11 @@
 # install this via terminal
 # pip3 install PyPDF2
+# pip install datasets transformers[sentencepiece]
+# pip install tensorflow
+# May need to upgrade to latest pip if it doesn't work^^^
+# pip install --upgrade pip
+
+# Be prepared that the summarizer takes a long time and will output lots of warnings, but it works!
 
 # importing required modules
 import PyPDF2
@@ -11,6 +17,7 @@ from nltk.corpus import stopwords
 import nltk
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
+from transformers import pipeline
 
 all_words = []
 all_sentences =[]
@@ -75,7 +82,7 @@ for word in no_stopwords:
 for word in v_output:
     output_n = lemmatizer.lemmatize(word, pos='n')
     lemmatized.append(output_n)
-    print(word, output_n)
+    # print(word, output_n)
 
 # Build a count vectorizer and extract term counts
 count_vectorizer = CountVectorizer()  # This counts the # of words
@@ -89,6 +96,26 @@ print(word_matrix)
 # Create the tf-idf transformer
 tfidf = TfidfTransformer()
 train_tfidf = tfidf.fit_transform(train_tc)
+
+# SUMMARIZER
+# get text from abstract
+page = pdfReader.pages[0]
+page_text = page.extract_text()
+formatted = page_text.lower()
+# print(formatted)
+start = formatted.find("abstract")
+end = formatted.find("i. ")
+abstract = formatted[start:end]
+# print("ABSTRACT: " + abstract)
+
+# Create summarizer with tensorflow model
+summarizer = pipeline("summarization", model="t5-base", tokenizer="t5-base", framework="tf")
+
+# this will take a minute or two, may need to use GPU
+summary_text = summarizer(abstract)
+print("ORIGINAL TEXT:\n" + abstract)
+print("SUMMARY: ")
+print(summary_text[0].values())
 
   
 # printing number of pages in
