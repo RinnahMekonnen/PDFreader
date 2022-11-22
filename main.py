@@ -6,10 +6,8 @@ from nltk.stem import WordNetLemmatizer
 # importing required modules
 import PyPDF2
 import pandas as pd
-import numpy as np
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import WordNetLemmatizer
-from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 import nltk
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -33,6 +31,7 @@ no_stopwords = []
 v_output = []
 lemmatized = []
 stemmed = []
+train_data_all = []
 
 # Pre-process training data 
 training_data = pd.read_csv("train_dataset_short.csv")
@@ -44,15 +43,19 @@ training_abstracts = training_abstracts.to_numpy().tolist() #convert to numpy ar
 #training_abstarcts = training_abstracts['ABSTRACT'].tolist() #convert to list
 print(training_abstracts)
 for abstract in training_abstracts:
-    tokenized_train = word_tokenize(abstract)
+    tokenized_train = [w for w in word_tokenize(abstract)]
     # remove numbers and symbols
     no_symbols_train = [x for x in tokenized_train if (x.isalnum())]
-    no_integers_train = [x for x in tokenized_train if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
+    no_integers_train = [x for x in no_symbols_train if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
+    #print(len(no_symbols_train))
+    #print(len(no_integers_train))
 
     # remove stop words
     nltk.download('stopwords')
     stop_words = stopwords.words("english")
     no_stopwords_train = [w for w in no_integers_train if w not in stop_words]
+
+    #print(len(no_stopwords_train))
 
     # Lemmatization
     nltk.download('wordnet')
@@ -65,13 +68,27 @@ for abstract in training_abstracts:
 
     # after verb lemmatizer, run through again with noun lemmatizer
     for word in v_output_train:
+        #print(output_n_train)
+        #print(len(output_n_train))
         output_n_train = lemmatizer.lemmatize(word, pos='n')
         lemmatized_train.append(output_n_train)
-print(lemmatized_train)
+    item = ' '.join(lemmatized_train)
+
+    train_data_all.append(item)
+    print(len(train_data_all))
+    #lemmatized_train.clear()
+        #print(lemmatized_train)
+        #print(len(lemmatized_train))
+
+#print("here")
+#print(type(lemmatized_train))
+#print(len(lemmatized_train))
 
 # Build a count vectorizer and extract term counts
-count_vectorizer = CountVectorizer(stop_words='english', ngram_range=(1,2), min_df=0.1, max_df=0.7, max_features=100)
-train_tc = count_vectorizer.fit_transform(training_abstracts)  # generates word counts for the words in your docs
+#count_vectorizer = CountVectorizer(stop_words='english', ngram_range=(1,2), min_df=0.1, max_df=0.7, max_features=100)
+count_vectorizer = CountVectorizer()
+train_tc = count_vectorizer.fit_transform(train_data_all)  # generates word counts for the words in your docs
+
 #print(train_tc)
 
 #create dataframe which gives us words
@@ -82,43 +99,10 @@ word_matrix=pd.DataFrame(train_tc.toarray(),columns=count_vectorizer.get_feature
 tfidf = TfidfTransformer()
 train_tfidf = tfidf.fit_transform(train_tc)
 
-print(train_tfidf)
 
-# for abstract in training_abstracts:
-#     #print(word_tokenize(abstract))
-#     tokenized_train = word_tokenize(abstract)
-    
-#     # remove numbers and symbols
-#     no_symbols_train = [x for x in tokenized_train if (x.isalnum())]
-#     no_integers_train = [x for x in tokenized_train if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
 
-#     # remove stop words
-#     nltk.download('stopwords')
-#     stop_words = stopwords.words("english")
-#     no_stopwords_train = [w for w in no_integers_train if w not in stop_words]
-
-#     # Lemmatization
-#     nltk.download('wordnet')
-#     lemmatizer = WordNetLemmatizer()
-
-#     # run through verb lemmatizer
-#     for word in no_stopwords_train:
-#         output_train = lemmatizer.lemmatize(word, pos='v')
-#         v_output_train.append(output_train)
-
-#     # after verb lemmatizer, run through again with noun lemmatizer
-#     for word in v_output_train:
-#         output_n_train = lemmatizer.lemmatize(word, pos='n')
-#         lemmatized_train.append(output_n_train)
-    
-    #y_value = ''
-    #y_train_data.clear()
-    #y_train_data.append(training_data.iloc[:,1:5].to_numpy().flatten())
-    #for x in y_train_data:
-    #    print(x)
-    #    y_value = y_value + x
-    
-    #y.append(int(y_value))
+print(train_tfidf.toarray())
+print(train_tfidf.shape)
 
 y_training_data= training_data.iloc[:,1:5]
 i = 0;
@@ -135,29 +119,15 @@ for i in range(len(y_training_data)):
         y.append(3)
         
 
-
-
-#train_data = train_data.append(train_tfidf);
-#print(train_data)
-    
-    #all_words_train.append([word_tokenize(abstract)]) #Tokenization- each abastract is an array within the array all_words_train
 # Train a Multinomial Naive Bayes classifier
 classifier = MultinomialNB()
 #y_train =  training_data.iloc[:,1:5].to_numpy().flatten()
+
+print(y)
+
+# how do I make this be an array of tfidf to be n-samples
 classifier.fit(train_tfidf, y)
 
-# Transform input data using count vectorizer
-#input_tc = count_vectorizer.transform(test_data)
-
-# Transform vectorized data using tfidf transformer
-#input_tfidf = tfidf.transform(input_tc)
-
-# Predict the output categories
-
-
-
-
-  
 # creating a pdf file object
 file = open('report.pdf', 'rb') #rb = open in binary format for reading
   
@@ -173,36 +143,13 @@ for i in range(number_of_pages):
     all_sentences.append(sent_tokenize(page_content)) #Tokenization
     #sentences = sent_tokenize(page_content) #sentences is of type list 
     all_words = all_words + word_tokenize(page_content) #Tokenization
-   
-    
-    #words = word_tokenize(page_content)
-    #print(type(page_content))
-    #print('page ' + str(i))
-    #print(page_content)
-
-# remove hyphen from words spanning 2 lines (this doesn't work yet)
-# hyphenated = re.findall(r'\w+(?:-\w+)+',all_words)
 
 # remove numbers and symbols
 no_symbols = [x for x in all_words if (x.isalnum())]
 no_integers = [x for x in no_symbols if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
 
 # remove stop words
-#nltk.download('stopwords')
-#stop_words = stopwords.words("english")
 no_stopwords = [w for w in no_integers if w not in stop_words]
-#print(no_stopwords)
-
-# Stemming
-# ps = PorterStemmer()
-# for w in no_stopwords:
-#     output = ps.stem(w)
-#     stemmed.append(output)
-#     print(w, " : ", ps.stem(w))
-
-# Lemmatization
-#nltk.download('wordnet')
-#lemmatizer = WordNetLemmatizer()
 
 # run through verb lemmatizer
 for word in no_stopwords:
@@ -214,20 +161,18 @@ for word in no_stopwords:
 for word in v_output:
     output_n = lemmatizer.lemmatize(word, pos='n')
     lemmatized.append(output_n)
-    #print(word, output_n)
+
+item_test = ' '.join(lemmatized)
 
 # Build a count vectorizer and extract term counts
-#count_vectorizer = CountVectorizer()  # This counts the # of words
-train_tc = count_vectorizer.transform(lemmatized)  # generates word counts for the words in your docs
-#print(train_tc)
-
+#train_tc = count_vectorizer.transform(lemmatized)  # generates word counts for the words in your docs
+train_tc = count_vectorizer.transform([item_test])
 #create dataframe which gives us words
 word_matrix=pd.DataFrame(train_tc.toarray(),columns=count_vectorizer.get_feature_names_out())
-#print(word_matrix)
 
 # Create the tf-idf transformer
-#tfidf = TfidfTransformer()
 input_tfidf = tfidf.transform(train_tc)
+print(input_tfidf.shape)
 
 # Predict the output categories
 predictions = classifier.predict(input_tfidf)
@@ -262,4 +207,4 @@ print(predictions)
 # file.close()
 
 if __name__ == "__main__":
-    print("Hello World")
+    print("END")
