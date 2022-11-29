@@ -37,7 +37,6 @@ all_words = []
 v_output = []
 lemmatized = []
 
-
 # Pre-process training data 
 training_data = pd.read_csv("train_dataset_short.csv")
 training_data.pop('id')
@@ -144,6 +143,7 @@ print(word_matrix)
 # Use tf-idf transformer
 input_tfidf = tfidf.transform(test_tc)
 
+
 # Predicts the topic of the paper
 def classify(X_train, y_train, X):
     # Train a Multinomial Naive Bayes classifier
@@ -155,6 +155,7 @@ def classify(X_train, y_train, X):
     # Predict the output categories
     predictions = classifier.predict(X)
     return predictions
+
 
 # Provides a summary of the paper
 def summarize():
@@ -183,6 +184,7 @@ def summarize():
     
     return summary
 
+# Determines the textual name of the numerical predicted topic
 def topic_name(topic_num):
     if topic_num == 0:
         return 'Computer Science'
@@ -208,4 +210,3 @@ if __name__ == "__main__":
 
     for sentence in summary:
         print(sentence)
-
