@@ -7,8 +7,6 @@ import nltk as nltk
 from nltk import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-
-
 # importing required modules
 import PyPDF2
 import pandas as pd
@@ -56,6 +54,10 @@ v_output = []
 lemmatized = []
 stemmed = []
 train_data_all = []
+
+summary = ""
+topic = 0
+pages = 0
 
 # Pre-process training data 
 training_data = pd.read_csv("train_dataset_short.csv")
@@ -129,7 +131,7 @@ train_tfidf = tfidf.fit_transform(train_tc)
 y_training_data = training_data.iloc[:, 1:5]
 i = 0
 
-# label encoding 0=computer science, 1=math, 2=physics, 3=none
+# label encoding 0=computer science, 1=math, 2=physics, 3=other
 for i in range(len(y_training_data)):
     if y_training_data.loc[i, 'Computer Science']:
         y.append(0)
@@ -142,12 +144,9 @@ for i in range(len(y_training_data)):
 
 # Train a Multinomial Naive Bayes classifier
 classifier = MultinomialNB()
-# y_train =  training_data.iloc[:,1:5].to_numpy().flatten()
 
-# print(y)
-
-# how do I make this be an array of tfidf to be n-samples
-classifier.fit(train_tfidf, y)
+# Train the classifier
+classifier.fit(train_tfidf, y) # x is the abstract and y is the topic of the paper (both expressed numerical form)
 
 # creating a pdf file object
 file = open('report.pdf', 'rb')  # rb = open in binary format for reading
