@@ -1,5 +1,8 @@
 # install this via terminal
 # pip3 install PyPDF2
+# pip install sumy or pip3 install sumy
+# May need to upgrade to latest pip if it doesn't work^^^
+# pip install --upgrade pip
 from nltk import word_tokenize          
 from nltk.stem import WordNetLemmatizer 
 
@@ -41,7 +44,7 @@ training_data.pop('id')
 training_abstracts = training_data.iloc[:,0] #returns only training data abstracts
 training_abstracts = training_abstracts.to_numpy().tolist() #convert to numpy array
 #training_abstarcts = training_abstracts['ABSTRACT'].tolist() #convert to list
-print(training_abstracts)
+#print(training_abstracts)
 for abstract in training_abstracts:
     tokenized_train = [w for w in word_tokenize(abstract)]
     # remove numbers and symbols
@@ -75,7 +78,7 @@ for abstract in training_abstracts:
     item = ' '.join(lemmatized_train)
 
     train_data_all.append(item)
-    print(len(train_data_all))
+    #print(len(train_data_all))
     #lemmatized_train.clear()
         #print(lemmatized_train)
         #print(len(lemmatized_train))
@@ -123,7 +126,7 @@ for i in range(len(y_training_data)):
 classifier = MultinomialNB()
 #y_train =  training_data.iloc[:,1:5].to_numpy().flatten()
 
-print(y)
+#print(y)
 
 # how do I make this be an array of tfidf to be n-samples
 classifier.fit(train_tfidf, y)
@@ -172,13 +175,36 @@ word_matrix=pd.DataFrame(train_tc.toarray(),columns=count_vectorizer.get_feature
 
 # Create the tf-idf transformer
 input_tfidf = tfidf.transform(train_tc)
-print(input_tfidf.shape)
+#print(input_tfidf.shape)
 
 # Predict the output categories
 predictions = classifier.predict(input_tfidf)
 
 print(predictions)
 
+
+# SUMMARIZER
+# get text from abstract
+page = pdfReader.pages[0]
+page_text = page.extract_text()
+formatted = page_text.lower()
+# print(formatted)
+start = formatted.find("abstract")
+end = formatted.find("i. ")
+abstract = formatted[start:end]
+
+# sumy summarizer
+LANGUAGE = "english"
+SENTENCES_COUNT = 5
+
+parser = PlaintextParser.from_string(abstract, Tokenizer(LANGUAGE))
+stemmer = Stemmer(LANGUAGE)
+
+summarizer = Summarizer(stemmer)
+summarizer.stop_words = get_stop_words(LANGUAGE)
+
+for sentence in summarizer(parser.document, SENTENCES_COUNT):
+    print(sentence)
   
 # printing number of pages in
 #  pdf file
