@@ -41,7 +41,7 @@ lemmatized = []
 training_data = pd.read_csv("train_dataset_short.csv")
 training_data.pop('id')
 print("\n--------------------------------------------Training Data Dataframe--------------------------------------------")
-print(training_data)
+print(training_data.iloc[:,0:4])
 
 training_abstracts = training_data.iloc[:, 0]  # returns only training data abstracts
 training_abstracts = training_abstracts.to_numpy().tolist()  # convert to numpy array
