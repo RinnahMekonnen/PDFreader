@@ -19,7 +19,7 @@ PDFreader is developed by Claire W., Lesli G., Miracle A., and Rinnah M. Our goa
 - misc.xml
 - modlues.xml
 - vcs.xml
-2. PDFreader.py - 
+2. PDFreader.py - pre-process testing data & creating a pdf reader object
 3. main.py - 
 4. report.pdf - 
 5. train_dataset.csv - 
