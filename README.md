@@ -6,9 +6,8 @@ PDFreader is developed by Claire W., Lesli G., Miracle A., and Rinnah M. Our goa
 ***
 * First, it parses the PDF file to extract essential information from the paper. 
 * Second, it is able to mine knowledge from the extracted information to help with paper comprehension and inspire new research ideas.:
-***
-## all the folders & files in the repository
 ---
+## all the folders & files in the repository
 1. .idea/ 
 - inspectionProfiles/ 
   - Project_Default.xml
