@@ -21,9 +21,7 @@ PDFreader is developed by Claire W., Lesli G., Miracle A., and Rinnah M. Our goa
 - vcs.xml
 2. PDFreader.py - pre-process testing data & creating a pdf reader object
 3. main.py - 
-4. report.pdf - 
-5. train_dataset.csv - 
-6. train_dataset_short.csv - 
+4. report.pdf -  new pdf file that is readable, tokenization, and count matrix
+5. train_dataset.csv - 14,000 pre-processed training and testing data
+6. train_dataset_short.csv - the abridged train_dataset used due to performance limitation
 7. README.md - 
-
-# README file that explains all the folders/files in the repository (what can be found where).
